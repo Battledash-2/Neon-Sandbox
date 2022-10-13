@@ -1,0 +1,24 @@
+{
+  "name": "neon-sandbox",
+  "version": "1.0.0",
+  "description": "1) First, run `git clone https://github.com/Battledash-2/Neon` to clone the source code\r 2) Second, create a Javascript file named `run.js`\r 3) In the file, require the lexer, parser and interpreter in `/src`.\r 4) To initiate, use `new Interpreter().eval(new Parser(new Lexer('ANY CODE HERE')));`",
+  "main": "parse.js",
+  "directories": {
+    "example": "examples",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Battledash-2/Neon-Sandbox.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Battledash-2/Neon-Sandbox/issues"
+  },
+  "homepage": "https://github.com/Battledash-2/Neon-Sandbox#readme"
+}

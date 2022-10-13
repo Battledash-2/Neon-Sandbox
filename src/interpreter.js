@@ -1,11 +1,3 @@
-// import { existsSync } from "https://deno.land/std@0.151.0/fs/exists.ts";
-const fs = require("fs");
-const path = require("path");
-
-// import Lexer from "./lexer.js";
-const Lexer = require("./lexer.js");
-const Parser = require("./parser.js");
-
 const Environment = require("./environment.js");
 const Constructors = require("./core/constructors.js");
 
@@ -133,7 +125,14 @@ class Interpreter {
 				let fenv = new Environment((to instanceof Environment) ? to.record : to, env);
 				return this.callFunc(exp?.other, fenv);
 			}
-			let pos = exp?.other?.type === 'IDENTIFIER' ? ((to instanceof Environment) ? to.lookup(exp?.other?.value, this.pos) : to?.[exp?.other?.value]) : this.eval(exp?.other, ((to instanceof Environment) ? to : new Environment(to, env)), false, true);
+
+			// to?.[exp?.other?.value]
+			const lookup = (rec, exp) => {
+				if (rec.hasOwnProperty(exp)) return rec[exp];
+				throw new ReferenceError(`Could not resolve variable '${exp}' (${this.pos.filename}:${this.pos.line}:${this.pos.cursor})`);
+			}
+
+			let pos = exp?.other?.type === 'IDENTIFIER' ? ((to instanceof Environment) ? to.lookup(exp?.other?.value, this.pos) : lookup(to, exp?.other?.value)) : this.eval(exp?.other, ((to instanceof Environment) ? to : new Environment(to, env)), false, true);
 			return pos;
 		}
 
@@ -250,43 +249,8 @@ class Interpreter {
 		}
 
 		// Imports
-		if (isTypeof('IMPORT')) {
-			// throw 'unimplemented';
-			let file  = exp.file.value;
-			let jsf = file.replace(/\\/g, '/').split('/');
-			jsf[jsf.length-1] = jsf[jsf.length-1]+'.js';
-
-			let fcontent;
-
-			if (file.endsWith('.js') && fs.existsSync(path.join(process.cwd(), file))) {
-				const renv = require(path.join(process.cwd(), file));
-				return renv;
-			} else if (fs.existsSync(path.join(process.cwd(), file))) {
-				fcontent = fs.readFileSync(path.join(process.cwd(), file));
-			} else if (fs.existsSync(path.join(__dirname, 'core', 'modules', ...jsf))) {
-				const renv = require(path.join(__dirname, 'core', 'modules', ...jsf));
-				return renv;
-			} else if (fs.existsSync(path.join(process.cwd(), '.modules', file))) {
-				fcontent = fs.readFileSync(path.join(process.cwd(), '.modules', file));
-			} else {
-				throw new ReferenceError(`Attempt to import file '${file}' which does not exist`);
-			}
-
-			let lexed  = new Lexer(fcontent, file);
-			let parsed = new Parser(lexed, file);
-			let runner = new Interpreter(file);
-
-			let fileEnv = ENVConstruct.create();
-			let resultEnv = runner.eval(parsed, fileEnv, true);
-
-			//env.define(fname, new Environment(resultEnv));
-			return resultEnv;
-		}
-
-		// Export
-		if (isTypeof('EXPORT')) {
-			this.exports[exp.value.value] = this.eval(exp.value, env);
-			return true;
+		if (isTypeof('IMPORT') || isTypeof('EXPORT')) {
+			throw new Error('Import/export functionality is not enabled in a sandbox environment.')
 		}
 
 		// Block
