@@ -85,6 +85,12 @@ class Interpreter {
 		// ------------------------
 		// OOP
 
+		// Shared functions
+		const lookup = (rec, exp) => {
+			if (rec.hasOwnProperty(exp)) return rec[exp];
+			throw new ReferenceError(`Could not resolve variable '${exp}' (${this.pos.filename}:${this.pos.line}:${this.pos.cursor})`);
+		}
+
 		// Arrays
 		if (isTypeof('ARRAY')) {
 			return exp.values.map(c=>this.eval(c, env));
@@ -94,7 +100,7 @@ class Interpreter {
 		if (isTypeof('ARRAY_SELECT')) {
 			let arr = this.eval(exp.array, env);
 			let to = this.eval(exp.select, env);
-			return arr.record ? arr.record[to] : arr[to];
+			return arr.record ? lookup(arr.record, to) : lookup(arr, to); // arr.record[to] : arr[to];
 		}
 
 		// Objects
@@ -124,12 +130,6 @@ class Interpreter {
 			if (exp?.other?.type === 'FUNCTION_CALL') {
 				let fenv = new Environment((to instanceof Environment) ? to.record : to, env);
 				return this.callFunc(exp?.other, fenv);
-			}
-
-			// to?.[exp?.other?.value]
-			const lookup = (rec, exp) => {
-				if (rec.hasOwnProperty(exp)) return rec[exp];
-				throw new ReferenceError(`Could not resolve variable '${exp}' (${this.pos.filename}:${this.pos.line}:${this.pos.cursor})`);
 			}
 
 			let pos = exp?.other?.type === 'IDENTIFIER' ? ((to instanceof Environment) ? to.lookup(exp?.other?.value, this.pos) : lookup(to, exp?.other?.value)) : this.eval(exp?.other, ((to instanceof Environment) ? to : new Environment(to, env)), false, true);
