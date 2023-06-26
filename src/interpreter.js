@@ -401,7 +401,7 @@ class Interpreter {
 		}
 
 		// User functions
-		if (!(func instanceof Internal) || (func?.type !== 'class' && func?.type !== 'function')) throw new Error(`Reference item is not a function (${func instanceof Internal}, ${func.type})`);
+		if (!(func instanceof Internal) || (func?.type !== 'class' && func?.type !== 'function')) throw new Error(`Reference item is not a function (${func instanceof Internal}, ${func?.type})`);
 		func = func.value;
 
 		let args = {};
